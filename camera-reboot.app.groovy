@@ -1,7 +1,7 @@
 /**
  *  Camera Reboot
  *
- *  Version: 1.1
+ *  Version: 1.11
  *
  *  Copyright 2015 Rob Landry
  *
@@ -30,7 +30,7 @@ preferences {
 	// the info section
 	section("Info") {
 		paragraph "Author:  Rob Landry"
-		paragraph "Version: 1.1"
+		paragraph "Version: 1.11"
 		paragraph "Date:    7/23/2015"
 	}
 
@@ -70,6 +70,7 @@ def updated() {
 
 def initialize() {
 	subscribe(vSwitch, "switch", switchHandler)
+	checkOnline()
 	scheduleHandler()
 }
 
@@ -77,7 +78,6 @@ def switchHandler(evt) {
 	if (evt.value == "on") {
 		scheduleHandler()
 	}
-
 }
 
 //create a schedule to check for errors... 5 minutes
@@ -93,6 +93,8 @@ def checkOnline() {
 	def isError=false
 
 	log.debug("Checking if ${cameraName} is ONLINE")
+
+	scheduleHandler()
 
 	def params = [
 		uri: "http://${adminUsername}:${adminPassword}@${ipAddress}:${cameraPort}",
@@ -119,6 +121,7 @@ def checkOnline() {
 		isError=true
 		errorMsg="Connection timed out"
 	}
+
 	if(isError) {
 		log.debug(errorMsg)
 		rebootCamera(errorMsg)
@@ -140,5 +143,4 @@ def rebootCamera(errorMsg) {
 	cameraSwitch.off()
 	log.info("Turning switch on.")
 	cameraSwitch.on()
-	scheduleHandler()
 }
